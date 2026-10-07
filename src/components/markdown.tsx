@@ -8,16 +8,17 @@ function inline(s: string): ReactNode[] {
 
 /** Small, safe Markdown renderer for headings, lists, checkboxes, tables and paragraphs. */
 export function Markdown({ text }: { text: string }) {
-  const lines = text.split("\n");
+  const lines: string[] = text.split("\n");
+  const at = (n: number) => lines[n] ?? "";
   const out: ReactNode[] = [];
   let i = 0;
   while (i < lines.length) {
-    const l = lines[i];
+    const l = at(i);
     if (/^\s*\|/.test(l)) {
       const rows: string[][] = [];
-      while (i < lines.length && /^\s*\|/.test(lines[i])) {
-        if (!/^\s*\|[\s:|-]+\|\s*$/.test(lines[i]))
-          rows.push(lines[i].trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
+      while (i < lines.length && /^\s*\|/.test(at(i))) {
+        if (!/^\s*\|[\s:|-]+\|\s*$/.test(at(i)))
+          rows.push(at(i).trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
         i++;
       }
       const [head, ...body] = rows;
@@ -34,8 +35,8 @@ export function Markdown({ text }: { text: string }) {
     if (/^\s*[-*] /.test(l) || /^\s*\d+\. /.test(l)) {
       const items: string[] = [];
       const ordered = /^\s*\d+\. /.test(l);
-      while (i < lines.length && (/^\s*[-*] /.test(lines[i]) || /^\s*\d+\. /.test(lines[i]))) {
-        items.push(lines[i].replace(/^\s*([-*]|\d+\.) /, ""));
+      while (i < lines.length && (/^\s*[-*] /.test(at(i)) || /^\s*\d+\. /.test(at(i)))) {
+        items.push(at(i).replace(/^\s*([-*]|\d+\.) /, ""));
         i++;
       }
       const Tag = ordered ? "ol" : "ul";
@@ -44,7 +45,7 @@ export function Markdown({ text }: { text: string }) {
           {items.map((it, k) => {
             const m = it.match(/^\[( |x)\] (.*)/i);
             return m ? (
-              <li key={k} className="-ml-5 list-none"><label className="flex gap-2"><input type="checkbox" defaultChecked={m[1] !== " "} className="mt-1 accent-primary" />{inline(m[2])}</label></li>
+              <li key={k} className="-ml-5 list-none"><label className="flex gap-2"><input type="checkbox" defaultChecked={m[1] !== " "} className="mt-1 accent-primary" />{inline(m[2] ?? "")}</label></li>
             ) : <li key={k}>{inline(it)}</li>;
           })}
         </Tag>,
@@ -52,7 +53,7 @@ export function Markdown({ text }: { text: string }) {
       continue;
     }
     const h = l.match(/^(#{1,4}) (.*)/);
-    if (h) out.push(<h3 key={i} className="mt-5 mb-1 text-xl font-semibold first:mt-0">{inline(h[2])}</h3>);
+    if (h) out.push(<h3 key={i} className="mt-5 mb-1 text-xl font-semibold first:mt-0">{inline(h[2] ?? "")}</h3>);
     else if (l.trim()) out.push(<p key={i} className="my-2 leading-relaxed">{inline(l)}</p>);
     i++;
   }
