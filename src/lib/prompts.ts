@@ -2,7 +2,8 @@ export type Tool = "email" | "summary" | "planner";
 
 const FORMAT = "Respond in clean Markdown. Do not add preamble or closing remarks about being an AI.";
 
-export function buildPrompt(tool: Tool, i: Record<string, string>) {
+type In = Partial<Record<"tone"|"recipient"|"purpose"|"details"|"sender"|"title"|"notes"|"range"|"hours"|"tasks", string>>;
+export function buildPrompt(tool: Tool, i: In) {
   if (tool === "email") {
     return {
       system: `You write clear, well-structured professional emails. ${FORMAT} Start with a line "**Subject:** ..." then a blank line, then the email body with greeting and sign-off.`,
